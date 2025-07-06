@@ -43,7 +43,12 @@ def add_watermark():
     except:
         font = ImageFont.load_default()
 
-    text_width, text_height = draw.textsize(watermark_text, font=font)
+    # ✅ Use textbbox instead of deprecated textsize
+    bbox = draw.textbbox((0, 0), watermark_text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+
+    # Position text at bottom-right with 20px padding
     x = width - text_width - 20
     y = height - text_height - 20
 
@@ -63,7 +68,9 @@ def add_watermark():
             messagebox.showerror("Save Error", f"Could not save image:\n{e}")
 
 def show_preview(image):
-    preview = image.resize((4000, 4000))
+    # Resize to fit the label without overwhelming the GUI
+    preview = image.copy()
+    preview.thumbnail((350, 350))  # Reasonable preview size
     preview = ImageTk.PhotoImage(preview)
     image_label.config(image=preview)
     image_label.image = preview
